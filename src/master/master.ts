@@ -258,7 +258,7 @@ export class Master {
     }
 
     if (state._stateID !== stateID) {
-      /// we don't care about ordered updates here
+      /// we don't care about protection here
       // logging.error(
       //   `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
       // );

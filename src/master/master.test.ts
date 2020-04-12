@@ -163,13 +163,14 @@ describe('update', () => {
     );
   });
 
-  test('invalid stateID', async () => {
-    await master.onUpdate(action, 100, 'gameID', '1');
-    expect(sendAll).not.toHaveBeenCalled();
-    expect(error).toHaveBeenCalledWith(
-      `invalid stateID, was=[100], expected=[1]`
-    );
-  });
+  /// no longer protecting this
+  // test('invalid stateID', async () => {
+  //   await master.onUpdate(action, 100, 'gameID', '1');
+  //   expect(sendAll).not.toHaveBeenCalled();
+  //   expect(error).toHaveBeenCalledWith(
+  //     `invalid stateID, was=[100], expected=[1]`
+  //   );
+  // });
 
   test('invalid playerID', async () => {
     await master.onUpdate(action, 1, 'gameID', '100');
@@ -187,15 +188,15 @@ describe('update', () => {
   });
 
   test('valid gameID / stateID / playerID', async () => {
-    await master.onUpdate(action, 1, 'gameID', '1');
+    await master.onUpdate(action, 2, 'gameID', '1');
     expect(sendAll).toHaveBeenCalled();
   });
 
   test('undo / redo', async () => {
-    await master.onUpdate(ActionCreators.undo(), 2, 'gameID', '0');
+    await master.onUpdate(ActionCreators.undo(), 3, 'gameID', '0');
     expect(error).not.toBeCalled();
 
-    await master.onUpdate(ActionCreators.undo(), 2, 'gameID', '1');
+    await master.onUpdate(ActionCreators.undo(), 3, 'gameID', '1');
     expect(error).toHaveBeenCalledWith(
       `playerID=[1] cannot undo / redo right now`
     );
@@ -203,9 +204,9 @@ describe('update', () => {
 
   test('game over', async () => {
     let event = ActionCreators.gameEvent('endGame');
-    await master.onUpdate(event, 2, 'gameID', '0');
-    event = ActionCreators.gameEvent('endTurn');
     await master.onUpdate(event, 3, 'gameID', '0');
+    event = ActionCreators.gameEvent('endTurn');
+    await master.onUpdate(event, 4, 'gameID', '0');
     expect(error).toHaveBeenCalledWith(`game over - gameID=[gameID]`);
   });
 });
