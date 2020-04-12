@@ -258,10 +258,11 @@ export class Master {
     }
 
     if (state._stateID !== stateID) {
-      logging.error(
-        `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
-      );
-      return;
+      /// we don't care about ordered updates here
+      // logging.error(
+      //   `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
+      // );
+      // return;
     }
 
     // Update server's version of the store.
