@@ -2738,8 +2738,11 @@ class Master {
         const credentials = 'payload' in action && 'credentials' in action.payload
             ? action.payload.credentials
             : undefined;
+        /// keep hold of current gameMetadata
+        let gameMetadata;
         if (IsSynchronous(this.storageAPI)) {
             const { metadata } = this.storageAPI.fetch(gameID, { metadata: true });
+            gameMetadata = metadata;
             const playerMetadata = getPlayerMetadata(metadata, playerID);
             isActionAuthentic = this.shouldAuth(metadata)
                 ? this.auth(credentials, playerMetadata)
@@ -2749,6 +2752,7 @@ class Master {
             const { metadata } = await this.storageAPI.fetch(gameID, {
                 metadata: true,
             });
+            gameMetadata = metadata;
             const playerMetadata = getPlayerMetadata(metadata, playerID);
             isActionAuthentic = this.shouldAuth(metadata)
                 ? await this.auth(credentials, playerMetadata)
@@ -2813,6 +2817,8 @@ class Master {
         this.transportAPI.sendAll((playerID) => {
             const filteredState = {
                 ...state,
+                /// send down players object only
+                gameMetadata: gameMetadata.players,
                 G: this.game.playerView(state.G, state.ctx, playerID),
                 deltalog: undefined,
                 _undo: [],
@@ -2888,6 +2894,8 @@ class Master {
         }
         const filteredState = {
             ...state,
+            /// send down players object only
+            gameMetadata: gameMetadata.players,
             G: this.game.playerView(state.G, state.ctx, playerID),
             deltalog: undefined,
             _undo: [],

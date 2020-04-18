@@ -10,8 +10,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'react-cookies';
 import './base-c99f5be2.js';
-import { S as SocketIO, L as Local } from './socketio-c1520591.js';
-import './master-b43c2472.js';
+import { S as SocketIO, L as Local } from './socketio-8e359263.js';
+import './master-b8611c48.js';
 import 'socket.io-client';
 
 /**
@@ -143,8 +143,9 @@ function Client(opts) {
             playerID: this.client.playerID,
             reset: this.client.reset,
             undo: this.client.undo,
-            redo: this.client.redo,
-            gameMetadata: this.client.gameMetadata
+            redo: this.client.redo /// assume we get gameMetadata from state
+            // gameMetadata: this.client.gameMetadata,
+
           }));
         }
 

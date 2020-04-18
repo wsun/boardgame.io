@@ -4,7 +4,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var reducer = require('./reducer-2ab02669.js');
 var base = require('./base-bdd9c13b.js');
-var master = require('./master-6b653588.js');
+var master = require('./master-7a9a4de2.js');
 var io = _interopDefault(require('socket.io-client'));
 
 /*

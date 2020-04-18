@@ -16,8 +16,8 @@ var React = _interopDefault(require('react'));
 var PropTypes = _interopDefault(require('prop-types'));
 var Cookies = _interopDefault(require('react-cookies'));
 require('./base-bdd9c13b.js');
-var socketio = require('./socketio-0f1f0296.js');
-require('./master-a92e41c9.js');
+var socketio = require('./socketio-8698d79e.js');
+require('./master-7a9a4de2.js');
 require('socket.io-client');
 
 /**
@@ -149,8 +149,9 @@ function Client(opts) {
             playerID: this.client.playerID,
             reset: this.client.reset,
             undo: this.client.undo,
-            redo: this.client.redo,
-            gameMetadata: this.client.gameMetadata
+            redo: this.client.redo /// assume we get gameMetadata from state
+            // gameMetadata: this.client.gameMetadata,
+
           }));
         }
 
