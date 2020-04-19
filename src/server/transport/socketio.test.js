@@ -14,6 +14,7 @@ jest.mock('../../master/master', () => {
     constructor() {
       this.onUpdate = jest.fn();
       this.onSync = jest.fn();
+      this.markUserConnection = jest.fn();
     }
   }
 

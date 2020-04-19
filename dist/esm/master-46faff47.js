@@ -16,11 +16,15 @@ const getPlayerMetadata = (gameMetadata, playerID) => {
     }
 };
 /// helper: filter credentials out of metadata
-/// returns an array of SimplePlayerData { id, name? }
+/// returns an array of SimplePlayerData { id, name?, connected? }
 function filterMetadata(gameMetadata) {
     if (gameMetadata && gameMetadata.players) {
         return Object.values(gameMetadata.players).map(player => {
-            return { id: player.id, name: player.name };
+            return {
+                id: player.id,
+                name: player.name,
+                connected: player.connected || false,
+            };
         });
     }
     return null;
@@ -133,7 +137,9 @@ class Master {
         /// keep hold of current gameMetadata
         let gameMetadata;
         if (IsSynchronous(this.storageAPI)) {
-            const { metadata } = this.storageAPI.fetch(gameID, { metadata: true });
+            const { metadata } = this.storageAPI.fetch(gameID, {
+                metadata: true,
+            });
             gameMetadata = metadata;
             const playerMetadata = getPlayerMetadata(metadata, playerID);
             isActionAuthentic = this.shouldAuth(metadata)
@@ -236,7 +242,7 @@ class Master {
      * Called when the client connects / reconnects.
      * Returns the latest game state and the entire log.
      */
-    async onSync(gameID, playerID, numPlayers) {
+    async onSync(gameID, playerID, numPlayers, syncAll = false) {
         const key = gameID;
         let state;
         let initialState;
@@ -265,13 +271,13 @@ class Master {
         initialState = result.initialState;
         log = result.log;
         gameMetadata = result.metadata;
-        if (gameMetadata) {
-            filteredMetadata = filterMetadata(gameMetadata);
-        }
         // If the game doesn't exist, then create one on demand.
         // TODO: Move this out of the sync call.
         if (state === undefined) {
-            initialState = state = InitializeGame({ game: this.game, numPlayers });
+            initialState = state = InitializeGame({
+                game: this.game,
+                numPlayers,
+            });
             this.subscribeCallback({
                 state,
                 gameID,
@@ -284,30 +290,67 @@ class Master {
                 await this.storageAPI.setState(key, state);
             }
         }
-        const filteredState = {
-            ...state,
-            G: this.game.playerView(state.G, state.ctx, playerID),
-            deltalog: undefined,
-            _undo: [],
-            _redo: [],
-        };
-        /// send down players object only
+        /// clean up and remove credentials
         if (gameMetadata && gameMetadata.players) {
-            filteredState.gameMetadata = filteredMetadata;
+            filteredMetadata = filterMetadata(gameMetadata);
         }
-        log = redactLog(log, playerID);
-        const syncInfo = {
-            state: filteredState,
-            log,
-            filteredMetadata,
-            initialState,
+        /// prepare payload for a specific player
+        const preparePayload = (specificPlayerID) => {
+            const filteredState = {
+                ...state,
+                G: this.game.playerView(state.G, state.ctx, specificPlayerID),
+                deltalog: undefined,
+                _undo: [],
+                _redo: [],
+            };
+            const finalLog = redactLog(log, specificPlayerID);
+            const syncInfo = {
+                state: filteredState,
+                log: finalLog,
+                filteredMetadata,
+                initialState,
+            };
+            return {
+                type: 'sync',
+                args: [gameID, syncInfo],
+            };
         };
+        /// syncAll means syncing all clients with new data
+        if (syncAll) {
+            this.transportAPI.sendAll(preparePayload);
+            return;
+        }
+        /// otherwise, just sync the individual player
         this.transportAPI.send({
             playerID,
-            type: 'sync',
-            args: [gameID, syncInfo],
+            ...preparePayload(playerID),
         });
         return;
+    }
+    /// Mark a user connection status
+    /// sets 'connected' in gameMetadata for a given player
+    async markUserConnection(gameID, playerID, connected) {
+        let gameMetadata;
+        if (IsSynchronous(this.storageAPI)) {
+            const { metadata } = this.storageAPI.fetch(gameID, {
+                metadata: true,
+            });
+            gameMetadata = metadata;
+        }
+        else {
+            const { metadata } = await this.storageAPI.fetch(gameID, {
+                metadata: true,
+            });
+            gameMetadata = metadata;
+        }
+        if (gameMetadata &&
+            gameMetadata.players &&
+            playerID &&
+            gameID &&
+            gameMetadata.players[playerID]) {
+            gameMetadata.players[playerID].connected = connected;
+            await this.storageAPI.setMetadata(gameID, gameMetadata);
+        }
     }
 }
 

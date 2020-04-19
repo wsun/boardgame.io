@@ -330,6 +330,7 @@ describe('.createApiServer', () => {
                   metadata: {
                     players: {
                       '0': {
+                        connected: true,
                         credentials,
                         name: 'bob',
                       },
@@ -762,10 +763,12 @@ describe('.createApiServer', () => {
                 '0': {
                   id: 0,
                   credentials: 'SECRET1',
+                  connected: true,
                 },
                 '1': {
                   id: 1,
                   credentials: 'SECRET2',
+                  connected: false,
                 },
               },
             },
@@ -796,8 +799,14 @@ describe('.createApiServer', () => {
       });
 
       test('returns player names', async () => {
-        expect(rooms[0].players).toEqual([{ id: 0 }, { id: 1 }]);
-        expect(rooms[1].players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(rooms[0].players).toEqual([
+          { id: 0, connected: true },
+          { id: 1, connected: false },
+        ]);
+        expect(rooms[1].players).toEqual([
+          { id: 0, connected: true },
+          { id: 1, connected: false },
+        ]);
       });
     });
   });
@@ -813,11 +822,15 @@ describe('.createApiServer', () => {
               players: {
                 '0': {
                   id: 0,
+                  name: 'Apple',
                   credentials: 'SECRET1',
+                  connected: true,
                 },
                 '1': {
                   id: 1,
+                  name: 'Banana',
                   credentials: 'SECRET2',
+                  connected: false,
                 },
               },
             },
@@ -844,7 +857,10 @@ describe('.createApiServer', () => {
       });
 
       test('returns player names', async () => {
-        expect(room.players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(room.players).toEqual([
+          { id: 0, name: 'Apple', connected: true },
+          { id: 1, name: 'Banana', connected: false },
+        ]);
       });
     });
 

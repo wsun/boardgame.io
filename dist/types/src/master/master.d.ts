@@ -34,9 +34,6 @@ export declare function redactLog(log: LogEntry[], playerID: PlayerID): {
         type: "GAME_EVENT";
     };
     _stateID: number;
-    /**
-     * Verifies that the game has metadata and is using credentials.
-     */
     turn: number;
     phase: string;
     automatic?: boolean;
@@ -83,6 +80,7 @@ export declare class Master {
      * Called when the client connects / reconnects.
      * Returns the latest game state and the entire log.
      */
-    onSync(gameID: string, playerID: string, numPlayers: number): Promise<void>;
+    onSync(gameID: string, playerID: string, numPlayers: number, syncAll?: boolean): Promise<void>;
+    markUserConnection(gameID: string, playerID: string, connected: boolean): Promise<void>;
 }
 export {};

@@ -113,14 +113,29 @@ export function SocketIO({
               TransportAPI(gameID, socket, clientInfo, roomInfo),
               auth
             );
-            await master.onSync(gameID, playerID, numPlayers);
+            /// mark user connected
+            await master.markUserConnection(gameID, playerID, true);
+            /// sync to everyone on connection
+            await master.onSync(gameID, null, numPlayers, true);
           });
 
-          socket.on('disconnect', () => {
+          socket.on('disconnect', async () => {
             if (clientInfo.has(socket.id)) {
-              const { gameID } = clientInfo.get(socket.id);
+              const { gameID, playerID } = clientInfo.get(socket.id);
               roomInfo.get(gameID).delete(socket.id);
               clientInfo.delete(socket.id);
+
+              const master = new Master(
+                game,
+                app.context.db,
+                TransportAPI(gameID, socket, clientInfo, roomInfo),
+                auth
+              );
+              /// mark user disconnected
+              await master.markUserConnection(gameID, playerID, false);
+              /// default to 100 players per room
+              /// (in the unlikely scenario we're syncing to a dead room?)
+              await master.onSync(gameID, null, 100, true);
             }
           });
         });

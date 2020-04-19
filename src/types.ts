@@ -12,12 +12,6 @@ export { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
 
-/// sent down with state
-type SimplePlayerData = {
-  id: number;
-  name?: string;
-};
-
 export interface State {
   G: object;
   ctx: Ctx;
@@ -29,7 +23,7 @@ export interface State {
   _redo: Array<Undo>;
   _stateID: number;
   /// gameMetadata sent down with state
-  gameMetadata?: Array<SimplePlayerData>;
+  gameMetadata?: FilteredMetadata;
 }
 
 export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
@@ -237,6 +231,7 @@ export namespace Server {
     id: number;
     name?: string;
     credentials?: string;
+    connected?: boolean;
   };
 
   export interface GameMetadata {
@@ -310,6 +305,7 @@ export namespace ActionPayload {
 export type FilteredMetadata = {
   id: number;
   name?: string;
+  connected?: boolean;
 }[];
 
 export interface SyncInfo {

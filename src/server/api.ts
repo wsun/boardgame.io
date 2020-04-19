@@ -138,7 +138,11 @@ export const addApiToServer = ({
         gameID,
         players: Object.values(metadata.players).map((player: any) => {
           // strip away credentials
-          return { id: player.id, name: player.name };
+          return {
+            id: player.id,
+            name: player.name,
+            connected: player.connected || false,
+          };
         }),
         setupData: metadata.setupData,
       });
@@ -159,7 +163,11 @@ export const addApiToServer = ({
     const strippedRoom = {
       roomID: gameID,
       players: Object.values(metadata.players).map((player: any) => {
-        return { id: player.id, name: player.name };
+        return {
+          id: player.id,
+          name: player.name,
+          connected: player.connected || false,
+        };
       }),
       setupData: metadata.setupData,
     };
@@ -185,7 +193,10 @@ export const addApiToServer = ({
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (metadata.players[playerID].name) {
+    if (
+      metadata.players[playerID].name &&
+      metadata.players[playerID].connected
+    ) {
       ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 

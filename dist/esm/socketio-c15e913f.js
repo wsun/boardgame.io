@@ -1,6 +1,6 @@
 import { a as _classCallCheck, k as _objectSpread2, d as _inherits, _ as _createClass, s as sync, o as _toConsumableArray, i as _createSuper, v as update, r as reset } from './reducer-27d6d11b.js';
 import { S as Sync } from './base-c99f5be2.js';
-import { M as Master } from './master-715f9c3d.js';
+import { M as Master } from './master-46faff47.js';
 import io from 'socket.io-client';
 
 /*
