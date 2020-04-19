@@ -124,7 +124,7 @@ class _ClientImpl {
         case Actions.MAKE_MOVE:
         case Actions.GAME_EVENT: {
           const deltalog = state.deltalog;
-          this.log = [...this.log, ...deltalog];
+          this.log = [...this.log, ...deltalog].slice(-200);
           break;
         }
 
@@ -146,8 +146,7 @@ class _ClientImpl {
           // client adds an entry to the log followed by
           // the update from the master here.
           deltalog = deltalog.filter(l => l._stateID > id);
-
-          this.log = [...this.log, ...deltalog];
+          this.log = [...this.log, ...deltalog].slice(-200);
           break;
         }
 
