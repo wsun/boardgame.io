@@ -8937,7 +8937,7 @@ var _ClientImpl = /*#__PURE__*/function () {
             case GAME_EVENT:
               {
                 var deltalog = state.deltalog;
-                _this.log = [].concat(_toConsumableArray(_this.log), _toConsumableArray(deltalog));
+                _this.log = [].concat(_toConsumableArray(_this.log), _toConsumableArray(deltalog)).slice(-200);
                 break;
               }
 
@@ -8964,7 +8964,7 @@ var _ClientImpl = /*#__PURE__*/function () {
                 _deltalog = _deltalog.filter(function (l) {
                   return l._stateID > id;
                 });
-                _this.log = [].concat(_toConsumableArray(_this.log), _toConsumableArray(_deltalog));
+                _this.log = [].concat(_toConsumableArray(_this.log), _toConsumableArray(_deltalog)).slice(-200);
                 break;
               }
 
@@ -9600,7 +9600,7 @@ class InMemory extends Sync {
     setState(gameID, state, deltalog) {
         if (deltalog && deltalog.length > 0) {
             const log = this.log.get(gameID) || [];
-            this.log.set(gameID, log.concat(deltalog));
+            this.log.set(gameID, log.concat(deltalog).slice(-200));
         }
         this.state.set(gameID, state);
     }

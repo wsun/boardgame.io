@@ -2033,7 +2033,11 @@ const addApiToServer = ({ app, db, games, lobbyConfig, generateCredentials, }) =
                 gameID,
                 players: Object.values(metadata.players).map((player) => {
                     // strip away credentials
-                    return { id: player.id, name: player.name };
+                    return {
+                        id: player.id,
+                        name: player.name,
+                        connected: player.connected || false,
+                    };
                 }),
                 setupData: metadata.setupData,
             });
@@ -2270,7 +2274,7 @@ class InMemory extends Sync {
     setState(gameID, state, deltalog) {
         if (deltalog && deltalog.length > 0) {
             const log = this.log.get(gameID) || [];
-            this.log.set(gameID, log.concat(deltalog));
+            this.log.set(gameID, log.concat(deltalog).slice(-200));
         }
         this.state.set(gameID, state);
     }
@@ -3104,7 +3108,7 @@ function SocketIO() {
                 playerID: playerID,
                 socket: socket
               });
-              var master = new Master(game, app.context.db, TransportAPI(gameID, socket, clientInfo, roomInfo), auth); /// mark user connection
+              var master = new Master(game, app.context.db, TransportAPI(gameID, socket, clientInfo, roomInfo), auth); /// mark user connected
 
               await master.markUserConnection(gameID, playerID, true); /// sync to everyone on connection
 
@@ -3118,7 +3122,7 @@ function SocketIO() {
 
                 roomInfo.get(gameID)["delete"](socket.id);
                 clientInfo["delete"](socket.id);
-                var master = new Master(game, app.context.db, TransportAPI(gameID, socket, clientInfo, roomInfo), auth); /// mark user disconnection
+                var master = new Master(game, app.context.db, TransportAPI(gameID, socket, clientInfo, roomInfo), auth); /// mark user disconnected
 
                 await master.markUserConnection(gameID, playerID, false); /// default to 100 players per room
                 /// (in the unlikely scenario we're syncing to a dead room?)

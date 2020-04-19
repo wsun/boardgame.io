@@ -44,7 +44,7 @@ class InMemory extends Sync {
     setState(gameID, state, deltalog) {
         if (deltalog && deltalog.length > 0) {
             const log = this.log.get(gameID) || [];
-            this.log.set(gameID, log.concat(deltalog));
+            this.log.set(gameID, log.concat(deltalog).slice(-200));
         }
         this.state.set(gameID, state);
     }

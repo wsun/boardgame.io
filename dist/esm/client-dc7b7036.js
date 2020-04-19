@@ -1,9 +1,7 @@
-'use strict';
-
-var reducer = require('./reducer-2ab02669.js');
-var redux = require('redux');
-var Debug = require('./Debug-1dd51d10.js');
-var initialize = require('./initialize-2552b9df.js');
+import { A as ActionCreators, _ as _createClass, k as _objectSpread2, a as _classCallCheck, P as ProcessGameConfig, C as CreateGameReducer, r as reset, u as undo, l as redo, n as SYNC, U as UPDATE, o as _toConsumableArray, R as RESET, G as GAME_EVENT, M as MAKE_MOVE } from './reducer-27d6d11b.js';
+import { compose, applyMiddleware, createStore } from 'redux';
+import { D as Debug } from './Debug-6c0d5b46.js';
+import { I as InitializeGame } from './initialize-1e6f2248.js';
 
 /**
  * createDispatchers
@@ -26,7 +24,7 @@ function createDispatchers(storeActionType, innerActionNames, store, playerID, c
         args[_key] = arguments[_key];
       }
 
-      store.dispatch(reducer.ActionCreators[storeActionType](name, args, assumedPlayerID, credentials));
+      store.dispatch(ActionCreators[storeActionType](name, args, assumedPlayerID, credentials));
     };
 
     return dispatchers;
@@ -56,9 +54,9 @@ var _ClientImpl = /*#__PURE__*/function () {
         credentials = _ref.credentials,
         enhancer = _ref.enhancer;
 
-    reducer._classCallCheck(this, _ClientImpl);
+    _classCallCheck(this, _ClientImpl);
 
-    this.game = reducer.ProcessGameConfig(game);
+    this.game = ProcessGameConfig(game);
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;
@@ -67,7 +65,7 @@ var _ClientImpl = /*#__PURE__*/function () {
     this.gameStateOverride = null;
     this.subscribers = {};
     this._running = false;
-    this.reducer = reducer.CreateGameReducer({
+    this.reducer = CreateGameReducer({
       game: this.game,
       isClient: multiplayer !== undefined,
       numPlayers: numPlayers
@@ -75,22 +73,22 @@ var _ClientImpl = /*#__PURE__*/function () {
     this.initialState = null;
 
     if (!multiplayer) {
-      this.initialState = initialize.InitializeGame({
+      this.initialState = InitializeGame({
         game: this.game,
         numPlayers: numPlayers
       });
     }
 
     this.reset = function () {
-      _this.store.dispatch(reducer.reset(_this.initialState));
+      _this.store.dispatch(reset(_this.initialState));
     };
 
     this.undo = function () {
-      _this.store.dispatch(reducer.undo());
+      _this.store.dispatch(undo());
     };
 
     this.redo = function () {
-      _this.store.dispatch(reducer.redo());
+      _this.store.dispatch(redo());
     };
 
     this.store = null;
@@ -112,21 +110,21 @@ var _ClientImpl = /*#__PURE__*/function () {
           var state = store.getState();
 
           switch (action.type) {
-            case reducer.MAKE_MOVE:
-            case reducer.GAME_EVENT:
+            case MAKE_MOVE:
+            case GAME_EVENT:
               {
                 var deltalog = state.deltalog;
-                _this.log = [].concat(reducer._toConsumableArray(_this.log), reducer._toConsumableArray(deltalog));
+                _this.log = [].concat(_toConsumableArray(_this.log), _toConsumableArray(deltalog)).slice(-200);
                 break;
               }
 
-            case reducer.RESET:
+            case RESET:
               {
                 _this.log = [];
                 break;
               }
 
-            case reducer.UPDATE:
+            case UPDATE:
               {
                 var id = -1;
 
@@ -143,11 +141,11 @@ var _ClientImpl = /*#__PURE__*/function () {
                 _deltalog = _deltalog.filter(function (l) {
                   return l._stateID > id;
                 });
-                _this.log = [].concat(reducer._toConsumableArray(_this.log), reducer._toConsumableArray(_deltalog));
+                _this.log = [].concat(_toConsumableArray(_this.log), _toConsumableArray(_deltalog)).slice(-200);
                 break;
               }
 
-            case reducer.SYNC:
+            case SYNC:
               {
                 _this.initialState = action.initialState;
                 _this.log = action.log || [];
@@ -197,12 +195,12 @@ var _ClientImpl = /*#__PURE__*/function () {
     };
 
     if (enhancer !== undefined) {
-      enhancer = redux.compose(redux.applyMiddleware(SubscriptionMiddleware, TransportMiddleware, LogMiddleware), enhancer);
+      enhancer = compose(applyMiddleware(SubscriptionMiddleware, TransportMiddleware, LogMiddleware), enhancer);
     } else {
-      enhancer = redux.applyMiddleware(SubscriptionMiddleware, TransportMiddleware, LogMiddleware);
+      enhancer = applyMiddleware(SubscriptionMiddleware, TransportMiddleware, LogMiddleware);
     }
 
-    this.store = redux.createStore(this.reducer, this.initialState, enhancer);
+    this.store = createStore(this.reducer, this.initialState, enhancer);
     this.transport = {
       isConnected: true,
       onAction: function onAction() {},
@@ -235,7 +233,7 @@ var _ClientImpl = /*#__PURE__*/function () {
     this._debugPanel = null;
   }
 
-  reducer._createClass(_ClientImpl, [{
+  _createClass(_ClientImpl, [{
     key: "notifySubscribers",
     value: function notifySubscribers() {
       var _this2 = this;
@@ -258,7 +256,7 @@ var _ClientImpl = /*#__PURE__*/function () {
       var debugImpl = null;
 
       if (process.env.NODE_ENV !== 'production') {
-        debugImpl = Debug.Debug;
+        debugImpl = Debug;
       }
 
       if (this.debug && this.debug.impl) {
@@ -354,14 +352,14 @@ var _ClientImpl = /*#__PURE__*/function () {
 
       var G = this.game.playerView(state.G, state.ctx, this.playerID); // Combine into return value.
 
-      var ret = reducer._objectSpread2({}, state, {
+      var ret = _objectSpread2({}, state, {
         isActive: isActive,
         G: G,
         log: this.log
       });
 
       var isConnected = this.transport.isConnected;
-      ret = reducer._objectSpread2({}, ret, {
+      ret = _objectSpread2({}, ret, {
         isConnected: isConnected
       });
       return ret;
@@ -422,4 +420,4 @@ function Client(opts) {
   return new _ClientImpl(opts);
 }
 
-exports.Client = Client;
+export { Client as C };

@@ -5,7 +5,7 @@ import './Debug-6c0d5b46.js';
 import 'flatted';
 import './ai-9611bca7.js';
 import './initialize-1e6f2248.js';
-import { C as Client$1 } from './client-0718582d.js';
+import { C as Client$1 } from './client-dc7b7036.js';
 import React from 'react';
 import PropTypes from 'prop-types';
 
