@@ -9,6 +9,10 @@ import { PlayerAPI } from './plugins/plugin-player';
 import { RandomAPI } from './plugins/plugin-random';
 export { StorageAPI };
 export declare type AnyFn = (...args: any[]) => any;
+declare type SimplePlayerData = {
+    id: number;
+    name?: string;
+};
 export interface State {
     G: object;
     ctx: Ctx;
@@ -19,6 +23,7 @@ export interface State {
     _undo: Array<Undo>;
     _redo: Array<Undo>;
     _stateID: number;
+    gameMetadata?: Array<SimplePlayerData>;
 }
 export declare type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 export declare type StageName = string;

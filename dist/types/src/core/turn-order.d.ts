@@ -44,6 +44,10 @@ export declare function SetActivePlayersEvent(state: State, _playerID: PlayerID,
         moveType?: string;
     }[];
     _stateID: number;
+    gameMetadata?: {
+        id: number;
+        name?: string;
+    }[];
 };
 export declare function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]): {
     activePlayers: {};

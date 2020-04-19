@@ -9364,7 +9364,10 @@ function Client$1(opts) {
         var _board = null;
 
         if (board) {
-          _board = React.createElement(board, _objectSpread2({}, state, {}, this.props, {
+          _board = React.createElement(board, _objectSpread2({
+            /// assume we get gameMetadata from state
+            gameMetadata: this.client.gameMetadata
+          }, state, {}, this.props, {
             isMultiplayer: !!multiplayer,
             moves: this.client.moves,
             events: this.client.events,
@@ -9372,9 +9375,7 @@ function Client$1(opts) {
             playerID: this.client.playerID,
             reset: this.client.reset,
             undo: this.client.undo,
-            redo: this.client.redo /// assume we get gameMetadata from state
-            // gameMetadata: this.client.gameMetadata,
-
+            redo: this.client.redo
           }));
         }
 
@@ -9658,6 +9659,16 @@ const getPlayerMetadata = (gameMetadata, playerID) => {
         return gameMetadata.players[playerID];
     }
 };
+/// helper: filter credentials out of metadata
+/// returns an array of SimplePlayerData { id, name? }
+function filterMetadata(gameMetadata) {
+    if (gameMetadata && gameMetadata.players) {
+        return Object.values(gameMetadata.players).map(player => {
+            return { id: player.id, name: player.name };
+        });
+    }
+    return null;
+}
 function IsSynchronous(storageAPI) {
     return storageAPI.type() === Type.SYNC;
 }
@@ -9842,13 +9853,15 @@ class Master {
         this.transportAPI.sendAll((playerID) => {
             const filteredState = {
                 ...state,
-                /// send down players object only
-                gameMetadata: gameMetadata.players,
                 G: this.game.playerView(state.G, state.ctx, playerID),
                 deltalog: undefined,
                 _undo: [],
                 _redo: [],
             };
+            /// send down players object only
+            if (gameMetadata && gameMetadata.players) {
+                filteredState.gameMetadata = filterMetadata(gameMetadata);
+            }
             const log = redactLog(state.deltalog, playerID);
             return {
                 type: 'update',
@@ -9897,9 +9910,7 @@ class Master {
         log = result.log;
         gameMetadata = result.metadata;
         if (gameMetadata) {
-            filteredMetadata = Object.values(gameMetadata.players).map(player => {
-                return { id: player.id, name: player.name };
-            });
+            filteredMetadata = filterMetadata(gameMetadata);
         }
         // If the game doesn't exist, then create one on demand.
         // TODO: Move this out of the sync call.
@@ -9919,13 +9930,15 @@ class Master {
         }
         const filteredState = {
             ...state,
-            /// send down players object only
-            gameMetadata: gameMetadata.players,
             G: this.game.playerView(state.G, state.ctx, playerID),
             deltalog: undefined,
             _undo: [],
             _redo: [],
         };
+        /// send down players object only
+        if (gameMetadata && gameMetadata.players) {
+            filteredState.gameMetadata = filteredMetadata;
+        }
         log = redactLog(log, playerID);
         const syncInfo = {
             state: filteredState,

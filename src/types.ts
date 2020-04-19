@@ -12,6 +12,12 @@ export { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
 
+/// sent down with state
+type SimplePlayerData = {
+  id: number;
+  name?: string;
+};
+
 export interface State {
   G: object;
   ctx: Ctx;
@@ -22,6 +28,8 @@ export interface State {
   _undo: Array<Undo>;
   _redo: Array<Undo>;
   _stateID: number;
+  /// gameMetadata sent down with state
+  gameMetadata?: Array<SimplePlayerData>;
 }
 
 export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;

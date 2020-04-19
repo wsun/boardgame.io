@@ -10,8 +10,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'react-cookies';
 import './base-c99f5be2.js';
-import { S as SocketIO, L as Local } from './socketio-8e359263.js';
-import './master-b8611c48.js';
+import { S as SocketIO, L as Local } from './socketio-2801d83f.js';
+import './master-715f9c3d.js';
 import 'socket.io-client';
 
 /**
@@ -135,7 +135,10 @@ function Client(opts) {
         var _board = null;
 
         if (board) {
-          _board = React.createElement(board, _objectSpread2({}, state, {}, this.props, {
+          _board = React.createElement(board, _objectSpread2({
+            /// assume we get gameMetadata from state
+            gameMetadata: this.client.gameMetadata
+          }, state, {}, this.props, {
             isMultiplayer: !!multiplayer,
             moves: this.client.moves,
             events: this.client.events,
@@ -143,9 +146,7 @@ function Client(opts) {
             playerID: this.client.playerID,
             reset: this.client.reset,
             undo: this.client.undo,
-            redo: this.client.redo /// assume we get gameMetadata from state
-            // gameMetadata: this.client.gameMetadata,
-
+            redo: this.client.redo
           }));
         }
 

@@ -34,6 +34,17 @@ export const getPlayerMetadata = (
   }
 };
 
+/// helper: filter credentials out of metadata
+/// returns an array of SimplePlayerData { id, name? }
+function filterMetadata(gameMetadata: Server.GameMetadata) {
+  if (gameMetadata && gameMetadata.players) {
+    return Object.values(gameMetadata.players).map(player => {
+      return { id: player.id, name: player.name };
+    });
+  }
+  return null;
+}
+
 function IsSynchronous(
   storageAPI: StorageAPI.Sync | StorageAPI.Async
 ): storageAPI is StorageAPI.Sync {
@@ -284,13 +295,16 @@ export class Master {
     this.transportAPI.sendAll((playerID: string) => {
       const filteredState = {
         ...state,
-        /// send down players object only
-        gameMetadata: gameMetadata.players,
         G: this.game.playerView(state.G, state.ctx, playerID),
         deltalog: undefined,
         _undo: [],
         _redo: [],
       };
+
+      /// send down players object only
+      if (gameMetadata && gameMetadata.players) {
+        filteredState.gameMetadata = filterMetadata(gameMetadata);
+      }
 
       const log = redactLog(state.deltalog, playerID);
 
@@ -351,9 +365,7 @@ export class Master {
     gameMetadata = result.metadata;
 
     if (gameMetadata) {
-      filteredMetadata = Object.values(gameMetadata.players).map(player => {
-        return { id: player.id, name: player.name };
-      });
+      filteredMetadata = filterMetadata(gameMetadata);
     }
 
     // If the game doesn't exist, then create one on demand.
@@ -376,13 +388,16 @@ export class Master {
 
     const filteredState = {
       ...state,
-      /// send down players object only
-      gameMetadata: gameMetadata.players,
       G: this.game.playerView(state.G, state.ctx, playerID),
       deltalog: undefined,
       _undo: [],
       _redo: [],
     };
+
+    /// send down players object only
+    if (gameMetadata && gameMetadata.players) {
+      filteredState.gameMetadata = filteredMetadata;
+    }
 
     log = redactLog(log, playerID);
 

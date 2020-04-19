@@ -34,6 +34,9 @@ export declare function redactLog(log: LogEntry[], playerID: PlayerID): {
         type: "GAME_EVENT";
     };
     _stateID: number;
+    /**
+     * Verifies that the game has metadata and is using credentials.
+     */
     turn: number;
     phase: string;
     automatic?: boolean;

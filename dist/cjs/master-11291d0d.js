@@ -1,7 +1,9 @@
-import { P as ProcessGameConfig, e as error, C as CreateGameReducer, w as UNDO, x as REDO, M as MAKE_MOVE } from './reducer-27d6d11b.js';
-import { createStore } from 'redux';
-import { I as InitializeGame } from './initialize-1e6f2248.js';
-import { T as Type } from './base-c99f5be2.js';
+'use strict';
+
+var reducer = require('./reducer-2ab02669.js');
+var redux = require('redux');
+var initialize = require('./initialize-2552b9df.js');
+var base = require('./base-bdd9c13b.js');
 
 /*
  * Copyright 2018 The boardgame.io Authors
@@ -15,8 +17,18 @@ const getPlayerMetadata = (gameMetadata, playerID) => {
         return gameMetadata.players[playerID];
     }
 };
+/// helper: filter credentials out of metadata
+/// returns an array of SimplePlayerData { id, name? }
+function filterMetadata(gameMetadata) {
+    if (gameMetadata && gameMetadata.players) {
+        return Object.values(gameMetadata.players).map(player => {
+            return { id: player.id, name: player.name };
+        });
+    }
+    return null;
+}
 function IsSynchronous(storageAPI) {
-    return storageAPI.type() === Type.SYNC;
+    return storageAPI.type() === base.Type.SYNC;
 }
 /**
  * Redact the log.
@@ -92,7 +104,7 @@ const stripCredentialsFromAction = (action) => {
  */
 class Master {
     constructor(game, storageAPI, transportAPI, auth) {
-        this.game = ProcessGameConfig(game);
+        this.game = reducer.ProcessGameConfig(game);
         this.storageAPI = storageAPI;
         this.transportAPI = transportAPI;
         this.auth = null;
@@ -155,36 +167,36 @@ class Master {
         }
         state = result.state;
         if (state === undefined) {
-            error(`game not found, gameID=[${key}]`);
+            reducer.error(`game not found, gameID=[${key}]`);
             return { error: 'game not found' };
         }
         if (state.ctx.gameover !== undefined) {
-            error(`game over - gameID=[${key}]`);
+            reducer.error(`game over - gameID=[${key}]`);
             return;
         }
-        const reducer = CreateGameReducer({
+        const reducer$1 = reducer.CreateGameReducer({
             game: this.game,
         });
-        const store = createStore(reducer, state);
+        const store = redux.createStore(reducer$1, state);
         // Only allow UNDO / REDO if there is exactly one player
         // that can make moves right now and the person doing the
         // action is that player.
-        if (action.type == UNDO || action.type == REDO) {
+        if (action.type == reducer.UNDO || action.type == reducer.REDO) {
             if (state.ctx.currentPlayer !== playerID ||
                 state.ctx.activePlayers !== null) {
-                error(`playerID=[${playerID}] cannot undo / redo right now`);
+                reducer.error(`playerID=[${playerID}] cannot undo / redo right now`);
                 return;
             }
         }
         // Check whether the player is active.
         if (!this.game.flow.isPlayerActive(state.G, state.ctx, playerID)) {
-            error(`player not active - playerID=[${playerID}]`);
+            reducer.error(`player not active - playerID=[${playerID}]`);
             return;
         }
         // Check whether the player is allowed to make the move.
-        if (action.type == MAKE_MOVE &&
+        if (action.type == reducer.MAKE_MOVE &&
             !this.game.flow.getMove(state.ctx, action.payload.type, playerID)) {
-            error(`move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`);
+            reducer.error(`move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`);
             return;
         }
         if (state._stateID !== stateID) ;
@@ -199,13 +211,15 @@ class Master {
         this.transportAPI.sendAll((playerID) => {
             const filteredState = {
                 ...state,
-                /// send down players object only
-                gameMetadata: gameMetadata.players,
                 G: this.game.playerView(state.G, state.ctx, playerID),
                 deltalog: undefined,
                 _undo: [],
                 _redo: [],
             };
+            /// send down players object only
+            if (gameMetadata && gameMetadata.players) {
+                filteredState.gameMetadata = filterMetadata(gameMetadata);
+            }
             const log = redactLog(state.deltalog, playerID);
             return {
                 type: 'update',
@@ -254,14 +268,12 @@ class Master {
         log = result.log;
         gameMetadata = result.metadata;
         if (gameMetadata) {
-            filteredMetadata = Object.values(gameMetadata.players).map(player => {
-                return { id: player.id, name: player.name };
-            });
+            filteredMetadata = filterMetadata(gameMetadata);
         }
         // If the game doesn't exist, then create one on demand.
         // TODO: Move this out of the sync call.
         if (state === undefined) {
-            initialState = state = InitializeGame({ game: this.game, numPlayers });
+            initialState = state = initialize.InitializeGame({ game: this.game, numPlayers });
             this.subscribeCallback({
                 state,
                 gameID,
@@ -276,13 +288,15 @@ class Master {
         }
         const filteredState = {
             ...state,
-            /// send down players object only
-            gameMetadata: gameMetadata.players,
             G: this.game.playerView(state.G, state.ctx, playerID),
             deltalog: undefined,
             _undo: [],
             _redo: [],
         };
+        /// send down players object only
+        if (gameMetadata && gameMetadata.players) {
+            filteredState.gameMetadata = filteredMetadata;
+        }
         log = redactLog(log, playerID);
         const syncInfo = {
             state: filteredState,
@@ -299,4 +313,4 @@ class Master {
     }
 }
 
-export { Master as M };
+exports.Master = Master;

@@ -119,6 +119,8 @@ export function Client(opts) {
 
       if (board) {
         _board = React.createElement(board, {
+          /// assume we get gameMetadata from state
+          gameMetadata: this.client.gameMetadata,
           ...state,
           ...this.props,
           isMultiplayer: !!multiplayer,
@@ -129,9 +131,6 @@ export function Client(opts) {
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
-
-          /// assume we get gameMetadata from state
-          // gameMetadata: this.client.gameMetadata,
         });
       }
 
