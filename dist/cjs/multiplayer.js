@@ -7,7 +7,7 @@ require('redux');
 require('immer');
 require('./initialize-2552b9df.js');
 require('./base-bdd9c13b.js');
-var socketio = require('./socketio-23011229.js');
+var socketio = require('./socketio-c79c3c27.js');
 require('./master-a58a6d14.js');
 require('socket.io-client');
 

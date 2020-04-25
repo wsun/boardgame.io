@@ -10,7 +10,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'react-cookies';
 import './base-c99f5be2.js';
-import { S as SocketIO, L as Local } from './socketio-b9ffb235.js';
+import { S as SocketIO, L as Local } from './socketio-7b6ef99f.js';
 import './master-46faff47.js';
 import 'socket.io-client';
 

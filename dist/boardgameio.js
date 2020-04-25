@@ -10420,7 +10420,9 @@ var SocketIOTransport = /*#__PURE__*/function (_Transport) {
       this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers); // Keep track of connection status.
 
       this.socket.on('connect', function () {
-        _this2.isConnected = true;
+        _this2.isConnected = true; /// sync again to update everyone else's knowledge that you're connected again
+
+        _this2.socket.emit('sync', _this2.gameID, _this2.playerID, _this2.numPlayers);
 
         _this2.callback();
       });
