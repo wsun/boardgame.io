@@ -110,6 +110,8 @@ export const addApiToServer = ({
     let numPlayers = parseInt(ctx.request.body.numPlayers);
     if (!numPlayers) {
       numPlayers = 2;
+    } else if (numPlayers > 200) {
+      numPlayers = 200;
     }
 
     const game = games.find(g => g.name === gameName);
